@@ -1,0 +1,19 @@
+pub mod character;
+pub mod cloth;
+pub mod contact;
+pub mod deform;
+pub mod figure;
+pub mod overlay;
+pub mod perf;
+pub mod shadows;
+pub mod simulate;
+pub mod sky;
+pub mod spell;
+pub mod spray;
+pub mod terrain;
+pub mod wake;
+
+pub use character::Character;
+pub use perf::Perf;
+pub use spray::Spray;
+pub use terrain::Heightfield;

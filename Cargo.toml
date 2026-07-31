@@ -1,0 +1,33 @@
+[package]
+name = "snow"
+description = "Real-time snow rendering demo: clipmap terrain, persistent deformation, a procedural character, snow-surf and five water spells"
+version = "0.1.0"
+authors = ["Matthew Berger <matthewjordanberger@gmail.com>"]
+license = "MIT OR Apache-2.0"
+edition = "2024"
+
+[[bin]]
+name = "snow"
+path = "src/main.rs"
+
+[dependencies]
+nightshade = { git = "https://github.com/matthewjberger/nightshade", rev = "8116784308ee0a889b57d6eef00f25c8ebdfdb4f", features = [
+    "egui",
+    "tracing",
+    "gamepad",
+] }
+nalgebra-glm = { version = "0.20.0", features = ["convert-bytemuck"] }
+bytemuck = "1.25.0"
+naga_oil = { version = "0.22", default-features = false }
+rand = "0.9"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+
+[profile.wasm-release]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
