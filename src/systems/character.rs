@@ -27,14 +27,14 @@ const JUMP_SPEED: f32 = 6.2;
 /// Downward acceleration, in metres a second squared.
 ///
 /// Well above the real figure, which is the usual trade: at 9.81 a jump this
-/// high hangs for a second and a third, and the character reads as being on the
-/// moon. This gives roughly a metre of lift over two thirds of a second.
+/// high hangs for a second and a third and reads as low gravity. This gives
+/// roughly a metre of lift over two thirds of a second.
 const GRAVITY: f32 = 18.0;
 
 /// How much of the ground's steering authority survives in the air.
 ///
-/// Not zero, because a jump you cannot adjust at all is one the player fights,
-/// and not one, because then the ground contributes nothing.
+/// Enough to adjust a jump in flight, little enough that the launch still
+/// decides where it lands.
 const AIR_CONTROL: f32 = 0.35;
 
 /// Character locomotion and snow-surf physics.
@@ -80,9 +80,8 @@ pub struct Character {
     pub ground_height: f32,
     pub ground_normal: Vec3,
 
-    /// Height above the ground, exactly zero while standing on it. What the
-    /// figure lifts by, so a grounded frame poses precisely as it did before
-    /// there was a jump at all.
+    /// Height above the ground, exactly zero while standing on it. The figure
+    /// lifts by this, so a grounded frame poses exactly as it always has.
     pub air_height: f32,
     pub airborne: bool,
     /// Vertical speed while airborne, in metres a second.
@@ -191,15 +190,15 @@ pub fn update(
 
 /// Leaves the ground, falls back to it, and settles onto it.
 ///
-/// Grounded, the height is a spring onto the terrain, which is what carries the
-/// character over bumps without the camera jolting. Airborne it is plain
-/// ballistics, and the two never run at once.
+/// Grounded, the height is a spring onto the terrain, which carries the
+/// character over bumps with the camera steady. Airborne it is plain
+/// ballistics. One or the other runs, never both.
 fn vertical_step(character: &mut Character, step: f32, input: &SnowInput, rig: &mut CameraRig) {
     if !character.airborne && input.jump {
         character.airborne = true;
         character.vertical_velocity = JUMP_SPEED;
-        // Off the spring's current height rather than the terrain's, or a jump
-        // taken mid-bump starts from the wrong place.
+        // From the spring's current height, so a jump taken mid-bump launches
+        // from where the character actually is.
         character.position.y = character.position.y.max(character.ground_height);
     }
 
@@ -250,7 +249,8 @@ fn walk_step(character: &mut Character, step: f32, input: &SnowInput, rig: &Came
         let want = wish.x.atan2(wish.z);
         character.facing = angle_damp(character.facing, want, 11.0 * authority, step);
     } else {
-        // Nothing sheds speed in the air: a jump keeps the run that launched it.
+        // Speed is held through the arc, so a jump keeps the run that launched
+        // it.
         if character.airborne {
             return;
         }

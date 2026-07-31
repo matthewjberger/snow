@@ -93,7 +93,7 @@ fn wakePoint(tex: texture_2d<f32>, count: f32, u: f32, q: f32, side: f32, time: 
     // unrelated banks.
     let base = 0.24 + 0.44 * smoothstep(0.3, 2.6, scalars.z);
 
-    // Thrown snow is not a ruled surface.
+    // Thrown snow curls, so the tangent turns along the section.
     let tangentAngle = -0.24 + (1.89 + scalars.y * 3.30) * pow(q, 1.65);
     let sectionNormal = vec2f(-sin(tangentAngle), cos(tangentAngle));
     let lump = (noise2(vec2f(

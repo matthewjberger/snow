@@ -2,7 +2,7 @@
 //!
 //! One vertex format, one ring-to-ring loft, and three builders on top of it, so
 //! the body, the cowl and the fur trim all deform from the same skeleton and the
-//! same skin weights rather than each inventing its own.
+//! same skin weights.
 
 pub mod body;
 pub mod fur;

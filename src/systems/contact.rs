@@ -75,9 +75,9 @@ pub fn update(
 
 /// Both boots at once, which is what a landing is.
 ///
-/// Deeper and wider than a footfall and centred under the body rather than under
-/// either foot, with the snow going up rather than out: a drop punches a hole and
-/// throws a collar around it, where a stride shears snow forward.
+/// Deeper and wider than a footfall, centred under the body, with the snow going
+/// up: a drop punches a hole and throws a collar around it, where a stride
+/// shears snow forward.
 fn land(character: &Character, field: &mut Deformation, spray: &mut Spray) {
     let impact = character.landing_impact;
     let right_x = character.facing.cos();

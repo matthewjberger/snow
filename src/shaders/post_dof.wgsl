@@ -23,7 +23,7 @@ fn circleOfConfusion(z: f32, focus: f32) -> f32 {
     // The near side stays keyed to the focal distance, because that is the right anchor
     // for it: the near limit is a property of the subject distance, and it is the one
     // place this effect earns its keep.
-    let near = smoothstep(focus * 0.55, focus * 0.16, z);
+    let near = 1.0 - smoothstep(focus * 0.16, focus * 0.55, z);
     return far - near;
 }
 

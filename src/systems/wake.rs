@@ -107,9 +107,9 @@ pub fn update(
     wake.clock += delta_time;
     wake.odometer += (character.velocity.x.hypot(character.velocity.z)) * delta_time;
 
-    // Nothing is cutting the snow with the board off it, and the quarter second
-    // the spine survives is what lets an ollie land back into the same wake
-    // rather than starting a fresh one behind the player.
+    // The board cuts only while it is on the snow. The spine survives a quarter
+    // second, which is long enough for an ollie to land back into the wake it
+    // left.
     let active = !character.airborne && character.surf > 0.06 && character.speed > 1.6;
     if active {
         if !wake.active {

@@ -139,6 +139,11 @@ pub struct Settings {
     pub refill_rate: f32,
     pub deform_resolution: u32,
 
+    /// Fraction of the snowfall population that is drawn.
+    pub snowfall: f32,
+    /// How hard the wind pushes the falling snow, on top of the wind strength.
+    pub snowfall_wind: f32,
+
     pub wake_height: f32,
     pub wake_spray: f32,
     pub wind_streaks: bool,
@@ -207,6 +212,9 @@ impl Default for Settings {
             deform_berm: 1.0,
             refill_rate: 1.0,
             deform_resolution: 2048,
+
+            snowfall: 0.65,
+            snowfall_wind: 1.0,
 
             wake_height: 1.0,
             wake_spray: 1.0,

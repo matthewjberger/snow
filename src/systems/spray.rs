@@ -1,8 +1,17 @@
 use crate::settings;
 use crate::settings::Settings;
 
-/// Pool size.
+/// Slots the effects share: footfalls, the wake plume and every spell.
 pub const SPRAY_CAPACITY: usize = 5120;
+
+/// Slots reserved for ambient snowfall, past the end of the effects pool.
+///
+/// A separate population in the same field, so the weather and the effects each
+/// keep their own supply of slots.
+pub const SNOWFALL_COUNT: usize = 2600;
+
+/// Every slot the data texture carries.
+pub const FIELD_CAPACITY: usize = SPRAY_CAPACITY + SNOWFALL_COUNT;
 
 /// Terminal fall speed of a snow grain, in metres a second.
 const TERMINAL: f32 = 1.9;
@@ -44,7 +53,7 @@ impl Default for Spray {
             next: 0,
             live: 0,
             time: 0.0,
-            texels: vec![0.0; SPRAY_CAPACITY * 2 * 4],
+            texels: vec![0.0; FIELD_CAPACITY * 2 * 4],
         }
     }
 }
@@ -100,7 +109,7 @@ pub fn update(
     let mut live = 0;
     for slot in 0..SPRAY_CAPACITY {
         let first = slot * 4;
-        let second = (SPRAY_CAPACITY + slot) * 4;
+        let second = (FIELD_CAPACITY + slot) * 4;
 
         if spray.age[slot] >= spray.life[slot] {
             spray.texels[first + 3] = 0.0;
@@ -154,4 +163,9 @@ pub fn update(
 /// This frame's particle state, two rows of the data texture.
 pub fn texels(spray: &Spray) -> &[f32] {
     &spray.texels
+}
+
+/// The same rows, for the weather to fill in its reserved tail.
+pub fn texels_mut(spray: &mut Spray) -> &mut [f32] {
+    &mut spray.texels
 }

@@ -2561,7 +2561,7 @@ dependencies = [
 [[package]]
 name = "nightshade"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "arboard",
  "base64 0.22.1",
@@ -2616,7 +2616,7 @@ dependencies = [
 [[package]]
 name = "nightshade-ecs"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "pastey",
  "postcard",
@@ -2628,7 +2628,7 @@ dependencies = [
 [[package]]
 name = "nightshade-paint"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "nalgebra-glm",
  "nightshade-ecs",
@@ -2639,7 +2639,7 @@ dependencies = [
 [[package]]
 name = "nightshade-platform"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "accesskit",
  "accesskit_winit",
@@ -2655,7 +2655,7 @@ dependencies = [
 [[package]]
 name = "nightshade-renderer"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "bytemuck",
  "egui",
@@ -2683,7 +2683,7 @@ dependencies = [
 [[package]]
 name = "nightshade-text"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "bytemuck",
  "cosmic-text",
@@ -2695,7 +2695,7 @@ dependencies = [
 [[package]]
 name = "nightshade-ui"
 version = "0.56.0"
-source = "git+https://github.com/matthewjberger/nightshade?rev=8116784308ee0a889b57d6eef00f25c8ebdfdb4f#8116784308ee0a889b57d6eef00f25c8ebdfdb4f"
+source = "git+https://github.com/matthewjberger/nightshade?rev=c9f8b3f59567b8476349dfe9675bf9aac82f0298#c9f8b3f59567b8476349dfe9675bf9aac82f0298"
 dependencies = [
  "image",
  "nalgebra-glm",

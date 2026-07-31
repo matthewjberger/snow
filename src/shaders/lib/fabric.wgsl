@@ -66,7 +66,7 @@ fn cotangentFrame(N: vec3f, dp1: vec3f, dp2: vec3f, duv1: vec2f, duv2: vec2f) ->
     return mat3x3f(T * scale, B * scale, N);
 }
 
-// Everything a fabric fragment needs that is not a binding.
+// The per-fragment inputs the fabric shading takes, alongside its bindings.
 struct FabricInput {
     world: vec3f,
     normal: vec3f,

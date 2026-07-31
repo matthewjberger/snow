@@ -110,8 +110,8 @@ pub fn overwrite_pass<'e>(
 /// One uniform buffer with the bind group that reaches it.
 ///
 /// Every geometry program in the demo wants the same thing: one uniform block at
-/// binding zero, one slot per view it draws from. The block's type differs, so
-/// the size comes in rather than the type.
+/// binding zero, one slot per view it draws from. The block's type varies, so
+/// the size comes in as a parameter.
 pub struct UniformSlot {
     pub buffer: wgpu::Buffer,
     pub bind_group: wgpu::BindGroup,
@@ -146,9 +146,9 @@ pub fn write_uniform<T: bytemuck::Pod>(slot: &UniformSlot, queue: &wgpu::Queue, 
 
 /// What a geometry program varies from every other one.
 ///
-/// The four geometry passes differ only in their vertex layout, their blend and
+/// The four geometry passes differ in their vertex layout, their blend and
 /// whether they write depth. Everything else, down to the entry point names, is
-/// the same, so they share one builder rather than four copies that drift.
+/// shared, so one builder covers all four.
 pub struct GeometrySpec<'a> {
     pub label: &'a str,
     pub module: &'a wgpu::ShaderModule,
@@ -156,8 +156,8 @@ pub struct GeometrySpec<'a> {
     pub vertices: wgpu::VertexBufferLayout<'a>,
     pub color: wgpu::TextureFormat,
     pub blend: Option<wgpu::BlendState>,
-    /// `None` draws with no depth attachment at all, which is what the cascade
-    /// programs that render straight into a depth target want.
+    /// `None` draws with no depth attachment, which is what the cascade programs
+    /// that render straight into a depth target want.
     pub depth: Option<wgpu::TextureFormat>,
 }
 
@@ -187,9 +187,9 @@ pub fn geometry_pipeline(device: &wgpu::Device, spec: GeometrySpec<'_>) -> wgpu:
             })],
             compilation_options: Default::default(),
         }),
-        // Both faces everywhere: the far facets of a transparent prism are what
-        // carry the refraction, and the generated hexagons and lattices have no
-        // dependable winding to cull on.
+        // Both faces everywhere: the far facets of a transparent prism carry the
+        // refraction, and the generated hexagons and lattices have arbitrary
+        // winding.
         primitive: wgpu::PrimitiveState::default(),
         depth_stencil: spec.depth.map(|format| wgpu::DepthStencilState {
             format,

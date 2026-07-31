@@ -296,6 +296,10 @@ fn groups(ui: &mut egui::Ui, world: &mut World) {
         slider(ui, "Berm mass", &mut settings.deform_berm, 0.0..=3.0);
         slider(ui, "Refill rate", &mut settings.refill_rate, 0.0..=4.0);
 
+        heading(ui, "Weather");
+        slider(ui, "Snowfall", &mut settings.snowfall, 0.0..=1.0);
+        slider(ui, "Snowfall wind", &mut settings.snowfall_wind, 0.0..=3.0);
+
         heading(ui, "Snow-surf");
         slider(ui, "Wake height", &mut settings.wake_height, 0.0..=2.0);
         slider(ui, "Plume density", &mut settings.wake_spray, 0.0..=2.5);

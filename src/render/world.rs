@@ -35,8 +35,8 @@ pub struct SnowWorldPass {
     pub draw_calls: u32,
     pub triangles: u32,
     bound: bool,
-    /// The scene targets, cloned at bind time. The demo owns them rather than
-    /// taking them from the graph so it can render at its own resolution.
+    /// The scene targets, cloned at bind time. The demo owns them so it can
+    /// render at its own resolution.
     targets: Option<[wgpu::TextureView; 4]>,
 }
 

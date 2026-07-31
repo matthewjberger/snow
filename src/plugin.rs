@@ -43,10 +43,10 @@ fn initialize(snow: &mut SnowResources, world: &mut World) {
     world.res_mut::<Window>().use_fullscreen = true;
     world.res_mut::<DebugDraw>().show_grid = false;
 
-    // The demo owns its whole post chain, so the engine's is switched off at
-    // the settings rather than at the graph: the engine syncs the conditional
-    // passes from these after the game hook has run, and a pass disabled by
-    // hand is turned straight back on.
+    // The demo owns its whole post chain, so the engine's is switched off here
+    // at the settings: the engine syncs its conditional passes from these after
+    // the game hook has run, and would turn a hand-disabled pass straight back
+    // on.
     let settings = world.res_mut::<RenderSettings>();
     settings.taa_enabled = false;
     settings.bloom_enabled = false;

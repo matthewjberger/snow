@@ -1,10 +1,10 @@
 //! The frame's simulation, in the order the pieces depend on each other.
 //!
-//! One pass, because the order is not incidental: the character moves, the
-//! figure poses to where it moved, the cloth hangs off the figure, the contacts
-//! come off the feet the figure placed, and the deformation window centres on
-//! the character rather than on the camera. Splitting these into separately
-//! registered systems would let a reordering change how the snow looks.
+//! One pass, because each step feeds the next: the character moves, the figure
+//! poses to where it moved, the cloth hangs off the figure, the contacts come
+//! off the feet the figure placed, and the deformation window centres on the
+//! character. Registering these separately would put that order at the mercy of
+//! the registration order.
 
 use crate::camera::{self, RigTarget};
 use crate::ecs::SnowResources;
@@ -12,11 +12,16 @@ use crate::input::SnowInput;
 use crate::settings::Settings;
 use crate::systems::perf;
 use crate::systems::{
-    Perf, character, cloth, contact, deform, figure, shadows, spray, terrain, wake,
+    Perf, character, cloth, contact, deform, figure, shadows, snowfall, spray, terrain, wake,
 };
 use nightshade::prelude::*;
 
 pub fn simulate_system(snow: &mut SnowResources, world: &mut World) {
+    // The heightfield is empty until the load-time bakes have been read back,
+    // and every height query the character makes comes out of it.
+    if !crate::render::frame::booted(world) {
+        return;
+    }
     let frame_seconds = world.res::<Time>().delta_time.min(0.1);
     let settings = *world.res::<Settings>();
     let delta_time = if settings.freeze_time {
@@ -58,6 +63,7 @@ pub fn simulate_system(snow: &mut SnowResources, world: &mut World) {
         deform,
         heightfield,
         spray,
+        snowfall,
         wake,
         focus,
         ..
@@ -82,6 +88,7 @@ pub fn simulate_system(snow: &mut SnowResources, world: &mut World) {
     contact::update(contact, character, figure, deform, spray);
     timings[2].1 = elapsed(&mut clock);
 
+    snowfall::update(snowfall, spray, delta_time, &settings, *focus);
     spray::update(spray, delta_time, &settings, |x, z| {
         terrain::height_at(heightfield, x, z)
     });
@@ -102,7 +109,7 @@ pub fn simulate_system(snow: &mut SnowResources, world: &mut World) {
 /// Fits the shadow cascades to what the camera now sees, and moves the engine
 /// camera onto the rig.
 ///
-/// Last, because both read a rig the spells have already shaken.
+/// Last, because both read the rig after the spells have shaken it.
 pub fn present_system(snow: &mut SnowResources, world: &mut World) {
     let aspect = {
         let window = world.res::<Window>();
@@ -128,9 +135,8 @@ pub fn present_system(snow: &mut SnowResources, world: &mut World) {
 
 /// Milliseconds since the last call, restarting the clock.
 ///
-/// The engine's re-export rather than the standard library's, because the
-/// standard clock has no implementation on the web and panics the moment it is
-/// read.
+/// The engine's re-export of the clock, which has a web implementation. The
+/// standard library's panics the moment it is read there.
 fn elapsed(clock: &mut Instant) -> f32 {
     let taken = clock.elapsed().as_secs_f32() * 1000.0;
     *clock = Instant::now();

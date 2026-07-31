@@ -35,8 +35,8 @@ const STICK_DEADZONE: f32 = 0.18;
 /// How far the right trigger has to travel to count as held.
 const TRIGGER_THRESHOLD: f32 = 0.4;
 
-/// Applies a radial deadzone and rescales what is left to the full range, so the first
-/// millimetre past the threshold is not a step change in speed.
+/// Applies a radial deadzone and rescales what is left to the full range, so speed
+/// ramps from a standstill at the threshold.
 fn deaden(x: f32, y: f32) -> (f32, f32) {
     let length = (x * x + y * y).sqrt();
     if length < STICK_DEADZONE {

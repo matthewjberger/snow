@@ -8,6 +8,7 @@ pub mod perf;
 pub mod shadows;
 pub mod simulate;
 pub mod sky;
+pub mod snowfall;
 pub mod spell;
 pub mod spray;
 pub mod terrain;

@@ -44,10 +44,10 @@ pub fn configure_render_graph(
     let height = resources.surface_height.max(1);
     let mut library = shaders::new();
 
-    // The scene targets are the demo's own rather than graph transients: it
-    // renders at its own internal resolution, and the graph sizes transients to
-    // the surface for the engine's present and screenshot paths. Only the final
-    // image is a graph resource, and it stays full size.
+    // The demo owns the scene targets, because it renders at its own internal
+    // resolution while the graph sizes its transients to the surface for the
+    // engine's present and screenshot paths. Only the final image is a graph
+    // resource, and it stays full size.
     render_graph_pass(
         graph,
         Box::new(world::new(device, &mut library, HDR_FORMAT)),
@@ -69,9 +69,8 @@ pub fn configure_render_graph(
     .add()
     .expect("snow post chain");
 
-    // With no shared slots left, the read-write ordering the graph would have
-    // inferred has to be stated: the chain resolves the scene the world pass
-    // drew.
+    // With no shared slots left, the ordering is stated outright: the chain
+    // resolves the scene the world pass drew.
     render_graph_add_dependency(graph, "snow_post", "snow_world").expect("snow pass ordering");
 }
 

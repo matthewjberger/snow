@@ -63,7 +63,7 @@ fn ridgeField(p: vec2f, amp: f32) -> vec3f {
     let dpeaks = draw * (3.0 * raw * raw * 0.55 + 0.45);
 
     // A small floor under the envelope: low foothills in the gaps between massifs
-    // rather than absolute nothing, which reads as a cut-out.
+    // so the range fades out instead of cutting off.
     let e = 0.06 + 0.94 * env;
     let h = peaks * e;
     let dh = dpeaks * e + peaks * denv * 0.94;

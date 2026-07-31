@@ -4,7 +4,7 @@ use crate::render::gpu::SnowGpu;
 use crate::render::pipelines::{sampler_entry, texture_entry, uniform_entry};
 use crate::render::uniforms::SnowUniforms;
 use crate::shaders::{self, ShaderLibrary};
-use crate::systems::spray::SPRAY_CAPACITY;
+use crate::systems::spray::FIELD_CAPACITY;
 use nightshade::prelude::wgpu;
 
 /// The billboard field: one static quad grid and the program that places it.
@@ -160,11 +160,11 @@ pub fn write(
         bytemuck::cast_slice(texels),
         wgpu::TexelCopyBufferLayout {
             offset: 0,
-            bytes_per_row: Some(SPRAY_CAPACITY as u32 * 16),
+            bytes_per_row: Some(FIELD_CAPACITY as u32 * 16),
             rows_per_image: Some(2),
         },
         wgpu::Extent3d {
-            width: SPRAY_CAPACITY as u32,
+            width: FIELD_CAPACITY as u32,
             height: 2,
             depth_or_array_layers: 1,
         },
@@ -198,10 +198,10 @@ pub fn triangles(spray: &SprayRender) -> u32 {
 /// A static grid of quads.
 fn build_quads(device: &wgpu::Device) -> StaticMesh {
     const CORNERS: [[f32; 2]; 4] = [[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]];
-    let mut data = Vec::with_capacity(SPRAY_CAPACITY * 4 * 3);
-    let mut indices = Vec::with_capacity(SPRAY_CAPACITY * 6);
+    let mut data = Vec::with_capacity(FIELD_CAPACITY * 4 * 3);
+    let mut indices = Vec::with_capacity(FIELD_CAPACITY * 6);
 
-    for particle in 0..SPRAY_CAPACITY as u32 {
+    for particle in 0..FIELD_CAPACITY as u32 {
         for corner in CORNERS {
             data.extend_from_slice(&[particle as f32, corner[0], corner[1]]);
         }

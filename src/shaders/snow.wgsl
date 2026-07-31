@@ -435,11 +435,10 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
     }
 
     // -------------------------------------------------------------- wireframe
-    // Drawn from the interpolated grid coordinates rather than by a line-mode
-    // pipeline, because polygon-mode-line is a native-only device feature and
-    // this has to run on the web too. It is the same set of edges: the two axis
-    // families the clipmap is built on, and the diagonal the cell was split
-    // along, whose direction flips with cell parity.
+    // Drawn from the interpolated grid coordinates, which works on the web,
+    // where the line polygon mode is a native-only device feature. It covers the
+    // same edges: the two axis families the clipmap is built on, and the diagonal
+    // each cell was split along, whose direction flips with cell parity.
     if (uniforms.misc.w > 0.5) {
         let cell = floor(input.grid);
         let flipped = (i32(cell.x) + i32(cell.y)) % 2 != 0;

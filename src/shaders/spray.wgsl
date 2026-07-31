@@ -79,7 +79,7 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
     // Soft edged for powder, harder for a clod of thrown snow.
     let edge = mix(
         pow(clamp(1.0 - radius * radius, 0.0, 1.0), 1.6),
-        smoothstep(1.0, 0.65, radius),
+        1.0 - smoothstep(0.65, 1.0, radius),
         kind
     );
     // Powder is close to transparent on its own.

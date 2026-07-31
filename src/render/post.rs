@@ -403,11 +403,10 @@ pub fn bind(post: &mut SnowPostPass, gpu: &SnowGpu) {
 
 /// Rebuilds every target the chain owns at a new internal resolution.
 ///
-/// The chain's targets are its own rather than the graph's, so a surface resize
-/// or a change to the resolution slider has to reach them here. Dropping the
-/// bind groups is what makes the next frame rebind against the new views; the
-/// history is uninitialised again afterwards, which the caller signals by
-/// resetting `history_valid`.
+/// The chain owns these targets, so a surface resize or a move of the resolution
+/// slider reaches them here. Dropping the bind groups makes the next frame
+/// rebind against the new views, and the history comes back uninitialised, which
+/// the caller signals by resetting `history_valid`.
 pub fn resize(post: &mut SnowPostPass, device: &wgpu::Device, width: u32, height: u32) {
     let width = width.max(1);
     let height = height.max(1);

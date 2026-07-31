@@ -1,9 +1,8 @@
 //! App-wide state the systems read and mutate.
 //!
 //! Everything here has a fixed population and is written into a data texture
-//! each frame, which is why none of it is an entity: a pool of five thousand
-//! snow grains, eight water strands or ninety-six spine samples is one buffer,
-//! not a population to spawn into.
+//! each frame: a pool of five thousand snow grains, eight water strands or
+//! ninety-six spine samples is one buffer apiece.
 
 use crate::camera::CameraRig;
 use crate::systems::character::Character;
@@ -13,6 +12,7 @@ use crate::systems::deform::Deformation;
 use crate::systems::figure::Figure;
 use crate::systems::shadows::Shadows;
 use crate::systems::sky::Sky;
+use crate::systems::snowfall::Snowfall;
 use crate::systems::spell::lights::SpellLights;
 use crate::systems::spell::water::WaterBody;
 use crate::systems::spray::Spray;
@@ -30,6 +30,7 @@ pub struct SnowResources {
     pub cloth: Cloth,
     pub contact: Contact,
     pub spray: Spray,
+    pub snowfall: Snowfall,
     pub wake: Wake,
     pub water: WaterBody,
     pub lights: SpellLights,

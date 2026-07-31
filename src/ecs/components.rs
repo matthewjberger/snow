@@ -1,15 +1,15 @@
 //! Game components, carried on engine entities in the app member world.
 //!
 //! What lives here is what the demo creates and destroys one at a time: a grown
-//! ice prism, and a spell that has been cast. Everything with a fixed population
-//! written straight into a data texture each frame stays a resource, because a
-//! pool of five thousand snow grains is not five thousand entities.
+//! ice prism, and a spell that has been cast. Anything with a fixed population
+//! written straight into a data texture each frame stays a resource, where a
+//! pool of five thousand snow grains is one buffer.
 
 /// One grown ice prism.
 ///
 /// Ninety-odd of these stand at once, each with its own age, lifetime and growth
-/// rate, and each despawning on its own schedule. Growth is not a uniform scale:
-/// height leads and girth follows, so a crystal spears up and then thickens.
+/// rate, and each despawning on its own schedule. Height leads and girth follows,
+/// so a crystal spears up and then thickens.
 #[derive(Default, Clone, Copy, Debug)]
 pub struct Crystal {
     pub position: [f32; 3],
@@ -39,8 +39,8 @@ pub struct Sweep {
 
 /// A held stream of water tracking the hand and the aim.
 ///
-/// The spine is a record of where the tip has been rather than a shape
-/// recomputed from the current aim, which is what gives the body its momentum.
+/// The spine records where the tip has been, which is what gives the body its
+/// momentum.
 #[derive(Clone, Copy, Debug)]
 pub struct Ribbon {
     pub held: bool,

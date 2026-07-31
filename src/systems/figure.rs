@@ -238,10 +238,10 @@ impl Default for Figure {
 
 /// Where the feet go with no ground under them.
 ///
-/// Hung off the hips rather than planted, gathered up on the way and reaching
-/// down again on the way back, which is what a body does when it expects to land.
-/// The alternative is feet left at snow height while the hips climb, and the legs
-/// stretch to their reach limit and lock straight.
+/// Hung off the hips, gathered on the way up and reaching down again on the way
+/// back, which is what a body does when it expects to land. It also keeps the
+/// legs inside their reach: feet held at snow height while the hips climb would
+/// pull them straight.
 fn tuck_feet(
     figure: &mut Figure,
     step: f32,
@@ -258,8 +258,7 @@ fn tuck_feet(
 
     for foot in 0..2 {
         let side = if foot == 0 { -0.105 } else { 0.105 };
-        // Trailing slightly, and split fore and aft so the legs do not read as
-        // one shape seen twice.
+        // Trailing slightly, split fore and aft so each leg reads on its own.
         let along = if foot == 0 { 0.06 } else { -0.04 } - 0.10 * rising;
 
         let want = [
@@ -275,7 +274,7 @@ fn tuck_feet(
         }
         figure.touchdown[foot] = false;
         figure.foot_weight[foot] = exp_damp(figure.foot_weight[foot], 0.0, 18.0, step);
-        // So the frame after touchdown counts as a fresh plant and stamps.
+        // Leaves the frame after touchdown to count as a fresh plant and stamp.
         figure.was_stance[foot] = false;
     }
 }
@@ -316,9 +315,9 @@ pub fn update(
 
     let ground_x = character.position.x;
     let ground_z = character.position.z;
-    // The terrain rather than the character's own height: grounded the two agree,
-    // and the terrain is the steadier of the two over a bump. The jump is added
-    // on top as a lift, so a grounded frame poses exactly as it always did.
+    // Taken from the terrain, which stays steady over a bump, with the jump
+    // added on top as a lift. Grounded, the lift is zero and the pose is exactly
+    // as it always was.
     let ground_y = terrain::height_at(heightfield, ground_x, ground_z) + character.air_height;
     let root_y = ground_y - figure.sink + figure.hip_height + figure.bob;
 

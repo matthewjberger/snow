@@ -91,9 +91,9 @@ pub struct SnowGpu {
     pub crystal: SnowTexture,
 
     /// The scene the world pass draws into and the chain reads. Owned here
-    /// rather than taken from the graph because the demo renders at its own
-    /// internal resolution, and the graph's transients are sized to the surface
-    /// for the engine's own present and screenshot paths.
+    /// because the demo renders at its own internal resolution, while the graph
+    /// sizes its transients to the surface for the engine's present and
+    /// screenshot paths.
     pub scene: SnowTexture,
     pub scene_depth: SnowTexture,
     /// Camera-space depth and roughness, drawn before the beauty pass.
@@ -281,7 +281,7 @@ pub fn new(device: &wgpu::Device, deform_resolution: u32, width: u32, height: u3
             device,
             "snow_spray_state",
             DATA_FORMAT,
-            crate::systems::spray::SPRAY_CAPACITY as u32,
+            crate::systems::spray::FIELD_CAPACITY as u32,
             2,
             1,
             wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,

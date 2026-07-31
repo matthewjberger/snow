@@ -48,9 +48,9 @@ pub struct Cast<'a> {
 
 /// The spell of one kind that is up, if any.
 ///
-/// Each kind is single instance: a recast restarts it rather than stacking one
-/// on top of itself, and the pool of water strands is eight, so five spells that
-/// each stacked freely would starve each other of surface.
+/// Each kind is single instance: a recast restarts the one that is running. The
+/// pool holds eight water strands, which five freely stacking spells would empty
+/// between them.
 pub fn live<T: Component + Copy>(world: &World, mask: u64) -> Option<(Entity, T)> {
     world.ecs.worlds[GAME]
         .query_entities(mask)
@@ -75,8 +75,11 @@ pub fn commit<T: Component + Copy>(world: &mut World, entity: Option<Entity>, st
 /// than after the terrain, so the simulation pass sees this frame's marks.
 ///
 /// A spell is an entity: casting spawns one and the spell's own system despawns
-/// it when it has finished, which is why nothing here carries an active flag.
+/// it when it has finished, so liveness is the entity's existence.
 pub fn cast_system(snow: &mut SnowResources, world: &mut World) {
+    if !crate::render::frame::booted(world) {
+        return;
+    }
     let settings = world.res::<Settings>();
     let delta_time = if settings.freeze_time {
         0.0

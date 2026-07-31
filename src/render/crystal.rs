@@ -180,8 +180,8 @@ pub fn bind(crystal: &mut CrystalRender, device: &wgpu::Device, gpu: &SnowGpu) {
 
 /// Gathers the standing prisms out of the world and uploads them.
 ///
-/// Reporting whether anything is there, because a formation that has fully
-/// sublimated must stop being drawn rather than draw zero instances.
+/// Reports whether any are left, so a formation that has fully sublimated takes
+/// its pass down with it.
 pub fn write(
     crystal: &mut CrystalRender,
     queue: &wgpu::Queue,

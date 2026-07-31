@@ -155,7 +155,11 @@ fn fragmentMain(input: FullscreenVertex) -> @location(0) vec4f {
     let vignette = uniforms.look.y;
     if (vignette > 0.001) {
         let distance = length(uv - vec2f(0.5)) * 1.414;
-        mapped *= mix(1.0, smoothstep(1.05, 0.35, distance), vignette);
+        // Written the ascending way round on purpose: WGSL leaves smoothstep
+        // undefined when low is above high, and the browser rejects it outright
+        // where a native driver quietly accepts it.
+        let falloff = 1.0 - smoothstep(0.35, 1.05, distance);
+        mapped *= mix(1.0, falloff, vignette);
     }
 
     var encoded = linearToSrgb(mapped);

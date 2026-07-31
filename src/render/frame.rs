@@ -18,7 +18,7 @@ use crate::render::gpu::SnowGpu;
 use crate::render::pipelines::write_uniform;
 use crate::render::post as post_pass;
 use crate::render::post::{PostUniforms, SnowPostPass};
-use crate::render::readback::read_texture;
+use crate::render::readback::{Readback, begin_read, poll_read};
 use crate::render::sky as sky_pass;
 use crate::render::sky::SkyUniforms;
 use crate::render::spray as spray_pass;
@@ -46,6 +46,39 @@ pub struct SnowRender {
     pub gpu: SnowGpu,
     pub bakes: Bakes,
     pub post: PostState,
+    pub boot: Boot,
+    /// Latched once the heightfield has been read back. The sky goes back
+    /// through `boot` whenever the sun moves; the terrain is baked once and this
+    /// stays true from then on.
+    pub terrain_ready: bool,
+}
+
+/// How far through the load-time bakes the demo is.
+///
+/// Each step needs the previous one read back to the CPU, and a readback lands
+/// only once the runtime gets a turn, so they run a step per frame. The sky is
+/// solved four times because the snow bounces light back into it and the bake
+/// has to see its own answer.
+pub enum Boot {
+    /// The height and detail bakes are in flight.
+    Terrain(Readback),
+    /// Solving the sky, on the given iteration.
+    Sky {
+        iteration: u32,
+        pixels: Readback,
+    },
+    Ready,
+}
+
+/// Whether the load-time bakes have finished.
+///
+/// The heightfield is empty until they have, and the simulation waits for it:
+/// every height query the character makes comes out of it.
+pub fn booted(world: &World) -> bool {
+    world
+        .ecs
+        .resource::<SnowRender>()
+        .is_some_and(|render| render.terrain_ready)
 }
 
 /// What the screen-space chain has to remember between frames.
@@ -96,23 +129,106 @@ pub fn pre_render(renderer: &mut WgpuRenderer, world: &mut World) {
             gpu,
             bakes,
             post: PostState::default(),
+            boot: Boot::Ready,
+            terrain_ready: false,
         });
         run_static_bakes(renderer, world);
     }
 
     sync_internal_resolution(renderer, world);
-    solve_sky(renderer, world);
+    let idle = advance_boot(renderer, world);
+    if !booted(world) {
+        return;
+    }
+    // Held off while a solve is in flight, so dragging the dial lets each one
+    // finish.
+    if idle {
+        solve_sky(renderer, world);
+    }
     upload_character(renderer, world);
     sync_world_pass(renderer, world);
 }
 
+/// Runs one step of the load-time bakes, reporting whether the queue is clear.
+fn advance_boot(renderer: &mut WgpuRenderer, world: &mut World) -> bool {
+    let Some(render) = world.ecs.resource::<SnowRender>() else {
+        return false;
+    };
+    match &render.boot {
+        Boot::Ready => return true,
+        Boot::Terrain(readback) => {
+            let Some(bytes) = poll_read(readback, &renderer.device) else {
+                return false;
+            };
+            let pairs = bytemuck::cast_slice::<u8, f32>(&bytes).to_vec();
+            let snow = world
+                .ecs
+                .resource_mut::<SnowResources>()
+                .expect("snow state");
+            terrain::absorb_readback(&mut snow.heightfield, &pairs);
+            shadows::set_height_bounds(
+                &mut snow.shadows,
+                snow.heightfield.min_height - 4.0,
+                snow.heightfield.max_height + 6.0,
+            );
+            world
+                .ecs
+                .resource_mut::<SnowRender>()
+                .expect("snow render")
+                .terrain_ready = true;
+            begin_sky_iteration(renderer, world, 0);
+        }
+        Boot::Sky { iteration, pixels } => {
+            let Some(bytes) = poll_read(pixels, &renderer.device) else {
+                return false;
+            };
+            let iteration = *iteration;
+            let pixels = bytemuck::cast_slice::<u8, f32>(&bytes).to_vec();
+            let snow = world
+                .ecs
+                .resource_mut::<SnowResources>()
+                .expect("snow state");
+            sky::project_harmonics(&mut snow.sky, &pixels);
+            if iteration >= 3 {
+                world
+                    .ecs
+                    .resource_mut::<SnowRender>()
+                    .expect("snow render")
+                    .boot = Boot::Ready;
+                return true;
+            }
+            sky::update_ground_bounce(&mut snow.sky);
+            begin_sky_iteration(renderer, world, iteration + 1);
+        }
+    }
+    false
+}
+
+/// Bakes the sky once more and asks for the result back.
+fn begin_sky_iteration(renderer: &mut WgpuRenderer, world: &mut World, iteration: u32) {
+    bake_sky_once(renderer, world);
+    let render = world.ecs.resource::<SnowRender>().expect("snow render");
+    let pixels = begin_read(
+        &renderer.device,
+        &renderer.queue,
+        &render.gpu.sky_sh.texture,
+        SKY_SH_WIDTH,
+        SKY_SH_HEIGHT,
+        16,
+    );
+    world
+        .ecs
+        .resource_mut::<SnowRender>()
+        .expect("snow render")
+        .boot = Boot::Sky { iteration, pixels };
+}
+
 /// Keeps the internal render resolution in step with the window and the slider.
 ///
-/// The scene is drawn at the surface times the slider and only the final blit is
-/// full resolution, which is the whole point of the control: it buys frame time
-/// on the expensive passes without softening the tonemap or the sharpen. The
-/// graph's own transients scale proportionally, the chain's targets are rebuilt,
-/// and the history is declared invalid because the frames in it are the wrong
+/// The scene is drawn at the surface times the slider, and the final blit stays
+/// full resolution: the control buys frame time on the expensive passes while
+/// the tonemap and the sharpen keep their edge. The chain's targets are rebuilt
+/// to match, and the history is dropped because the frames in it are the wrong
 /// size to reproject.
 fn sync_internal_resolution(renderer: &mut WgpuRenderer, world: &mut World) {
     let scale = world.res::<Settings>().resolution_scale.clamp(0.25, 2.0);
@@ -611,7 +727,7 @@ fn sync_world_pass(renderer: &mut WgpuRenderer, world: &mut World) {
     deform::end_frame(&mut snow.deform);
 
     // The device-side number comes from the renderer, which brackets every
-    // submission a frame makes rather than only the demo's own passes.
+    // submission the frame makes.
     let gpu_milliseconds = renderer.timing.milliseconds;
     if let Some(pass) = render_graph_get_pass_mut(&mut renderer.graph, "snow_world")
         && let Some(pass) = (pass as &mut dyn std::any::Any).downcast_mut::<SnowWorldPass>()
@@ -680,32 +796,26 @@ fn run_static_bakes(renderer: &mut WgpuRenderer, world: &mut World) {
     }
     renderer.queue.submit(std::iter::once(encoder.finish()));
 
-    let pairs = {
-        let render = world.ecs.resource::<SnowRender>().expect("snow render");
-        let bytes = read_texture(
-            &renderer.device,
-            &renderer.queue,
-            &render.gpu.height.texture,
-            render.gpu.height.width,
-            render.gpu.height.height,
-            8,
-        );
-        bytemuck::cast_slice::<u8, f32>(&bytes).to_vec()
-    };
-
-    let snow = world
-        .ecs
-        .resource_mut::<SnowResources>()
-        .expect("snow state");
-    terrain::absorb_readback(&mut snow.heightfield, &pairs);
-    shadows::set_height_bounds(
-        &mut snow.shadows,
-        snow.heightfield.min_height - 4.0,
-        snow.heightfield.max_height + 6.0,
+    let render = world.ecs.resource::<SnowRender>().expect("snow render");
+    let height = begin_read(
+        &renderer.device,
+        &renderer.queue,
+        &render.gpu.height.texture,
+        render.gpu.height.width,
+        render.gpu.height.height,
+        8,
     );
+    world
+        .ecs
+        .resource_mut::<SnowRender>()
+        .expect("snow render")
+        .boot = Boot::Terrain(height);
 }
 
-/// Bakes the sky and solves the snow bounce against it.
+/// Re-solves the sky when the sun has moved.
+///
+/// The solve is the boot sequence's, a step per frame, so moving the sun puts
+/// the demo back into it and the dial stays live while it runs.
 fn solve_sky(renderer: &mut WgpuRenderer, world: &mut World) {
     {
         let sun = sky::sun_settings(world.res::<Settings>());
@@ -721,17 +831,7 @@ fn solve_sky(renderer: &mut WgpuRenderer, world: &mut World) {
         snow.sky.ground_bounce = nalgebra_glm::Vec3::zeros();
     }
 
-    for iteration in 0..4 {
-        bake_sky_once(renderer, world);
-        project_harmonics(renderer, world);
-        if iteration < 3 {
-            let snow = world
-                .ecs
-                .resource_mut::<SnowResources>()
-                .expect("snow state");
-            sky::update_ground_bounce(&mut snow.sky);
-        }
-    }
+    begin_sky_iteration(renderer, world, 0);
 }
 
 fn bake_sky_once(renderer: &mut WgpuRenderer, world: &mut World) {
@@ -761,24 +861,4 @@ fn bake_sky_once(renderer: &mut WgpuRenderer, world: &mut World) {
         );
     }
     renderer.queue.submit(std::iter::once(encoder.finish()));
-}
-
-fn project_harmonics(renderer: &mut WgpuRenderer, world: &mut World) {
-    let pixels = {
-        let render = world.ecs.resource::<SnowRender>().expect("snow render");
-        let bytes = read_texture(
-            &renderer.device,
-            &renderer.queue,
-            &render.gpu.sky_sh.texture,
-            SKY_SH_WIDTH,
-            SKY_SH_HEIGHT,
-            16,
-        );
-        bytemuck::cast_slice::<u8, f32>(&bytes).to_vec()
-    };
-    let snow = world
-        .ecs
-        .resource_mut::<SnowResources>()
-        .expect("snow state");
-    sky::project_harmonics(&mut snow.sky, &pixels);
 }
