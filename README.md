@@ -2,7 +2,7 @@
 
 A real-time snow demo built on the [Nightshade](https://github.com/matthewjberger/nightshade) engine.
 
-[Play it in the browser](https://matthewjberger.github.io/snow/)
+[Play it in the browser](https://matthewberger.dev/snow/)
 
 You walk a snowfield that remembers you. Footprints stay where you put them, the
 board cuts a groove and throws a wall of snow when you carve, and five water
