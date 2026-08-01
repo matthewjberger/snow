@@ -1,5 +1,7 @@
 # Snow
 
+<img width="480" height="270" alt="Snow_005" src="https://github.com/user-attachments/assets/ebc66bf8-e72e-4e8d-b636-ae9a7fe5e268" />
+
 A real-time snow demo built on the [Nightshade](https://github.com/matthewjberger/nightshade) engine.
 
 [Play it in the browser](https://matthewberger.dev/snow/)
@@ -7,8 +9,6 @@ A real-time snow demo built on the [Nightshade](https://github.com/matthewjberge
 You walk a snowfield that remembers you. Footprints stay where you put them, the
 board cuts a groove and throws a wall of snow when you carve, and five water
 spells bend, erupt and freeze the ground you are standing on.
-
-<img width="480" height="270" alt="Snow_005" src="https://github.com/user-attachments/assets/ebc66bf8-e72e-4e8d-b636-ae9a7fe5e268" />
 
 ## Controls
 
