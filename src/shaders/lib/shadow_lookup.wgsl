@@ -66,7 +66,7 @@ fn sampleCascadeTex(
 }
 
 // Pick a cascade and evaluate the soft shadow, cross-fading over the last 12% / of
-// each slice so the filter width never visibly steps.
+// each slice so the filter width stays smooth across the seam.
 fn sunShadow(
     cascade0: texture_2d<f32>,
     cascade0Samp: sampler,

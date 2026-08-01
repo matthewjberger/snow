@@ -191,11 +191,11 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
     );
 
     // Three things decide how much of a real crystal you can see through: the
-    // path, since a thin tip is nearly clear and a thick base is not; the grazing
+    // path, since a thin tip is nearly clear and a thick base is dense; the grazing
     // angle, since a facet seen edge on presents a long path and a strong
     // reflection; and the frost, where the prism is packed with the snow it grew
-    // through and is not transparent at all. The floor is high enough that a
-    // crystal never disappears against the field behind it.
+    // through and reads as solid. The floor is high enough to keep a crystal
+    // legible against the field behind it.
     let alpha = clamp(
         0.46 + 0.34 * (1.0 - exp(-path * 2.2)) + 0.26 * (1.0 - ndotv) + frost * 0.55,
         0.0,

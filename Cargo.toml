@@ -11,7 +11,7 @@ name = "snow"
 path = "src/main.rs"
 
 [dependencies]
-nightshade = { git = "https://github.com/matthewjberger/nightshade", rev = "c9f8b3f59567b8476349dfe9675bf9aac82f0298", features = [
+nightshade = { git = "https://github.com/matthewjberger/nightshade", rev = "cbf86c0c41fa32b08571fec868422913d9093569", features = [
     "egui",
     "tracing",
     "gamepad",

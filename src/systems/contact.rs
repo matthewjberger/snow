@@ -205,7 +205,7 @@ fn walk(character: &Character, field: &mut Deformation, moved: f32) {
     );
 }
 
-/// The surf wake: the groove the board cuts, and one berm on each side weighted by
+/// The surf wake: the groove the rider cuts, and one berm on each side weighted by
 /// the carve, so the outside of a turn throws a much heavier wall of snow than the
 /// inside.
 fn surf(character: &Character, field: &mut Deformation, moved: f32) {

@@ -126,7 +126,7 @@ fn shadeFabric(
         cavity = mix(1.0, w.z, weaveFade * 0.8);
     }
 
-    // Slub: real yarn is not uniform, and a little variation in the base tone does more
+    // Slub: real yarn varies along its length, and a little variation in the base tone does more
     // for "this is a woven thing" than another specular term.
     let slub = noise2(input.uv * vec2f(9.0, 26.0)) * 0.5 + 0.5;
     albedo *= 0.90 + 0.20 * slub;
@@ -150,7 +150,7 @@ fn shadeFabric(
     let sun = uniforms.sunRadiance.rgb;
     const INV_PI: f32 = 0.31830988618;
 
-    // Wrapped a little: fabric is not opaque at fibre scale, and the terminator on a
+    // Wrapped a little: fabric passes some light at fibre scale, and the terminator on a
     // sleeve is genuinely soft.
     let diffuse = wrapDiffuse(NdotL, 0.18);
     var color = albedo * INV_PI * sun * diffuse * shadow;

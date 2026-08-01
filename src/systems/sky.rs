@@ -2,8 +2,8 @@ use crate::constants::{SKY_SH_HEIGHT, SKY_SH_WIDTH};
 use crate::settings::Settings;
 use nalgebra_glm::Vec3;
 
-/// The four sliders the sun solve reads, lifted out so the solve does not have to
-/// borrow the whole settings store while the rest of the state is in hand.
+/// The four sliders the sun solve reads, lifted out so the solve borrows these
+/// alone while the rest of the state is in hand.
 pub struct SunSettings {
     pub azimuth: f32,
     pub elevation: f32,

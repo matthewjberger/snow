@@ -1,7 +1,7 @@
 #import snow::atmosphere::{latLongToDir, nishitaSky}
 
 // Bakes the atmospheric scattering integral into an equirectangular LUT. Re-run only
-// when the sun moves, never per frame.
+// when the sun moves, which is far rarer than a frame.
 
 struct SkyBakeUniforms {
     // (sunDir.xyz, sunIntensity)

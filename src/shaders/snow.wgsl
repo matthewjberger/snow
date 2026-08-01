@@ -119,7 +119,7 @@ fn shadowMapDelta(world: vec3f, geoN: vec3f, viewDist: f32) -> f32 {
 
     let clip = m * vec4f(biased, 1.0);
     let ndc = clip.xyz / clip.w;
-    // A large sentinel flags "this point is not inside the cascade at all".
+    // A large sentinel flags "this point fell outside every cascade".
     if (any(abs(ndc.xy) > vec2f(1.0)) || ndc.z < 0.0 || ndc.z > 1.0) { return 1e9; }
 
     let uv = vec2f(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
@@ -360,7 +360,7 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
 
     // --- glints ------------------------------------------------------------ Last, and
     // added as radiance rather than modulated into the reflectance, because a glint is
-    // a specular highlight from a crystal facet the shading normal does not represent.
+    // a specular highlight from a crystal facet finer than the shading normal carries.
     if (uniforms.snow.x > 0.001 && rockExposed < 0.5) {
         let g = snowGlints(
             world.xz, N, V, L, footprint, uniforms.snow.x, uniforms.snow.y

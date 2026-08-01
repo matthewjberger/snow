@@ -132,7 +132,7 @@ fn snowGlints(
     let NdotV = clamp(dot(N, V), 0.0, 1.0);
     let graze = pow(1.0 - NdotV, mix(1.5, 5.0, grazeGate));
 
-    // The sun must be low relative to the surface too, or a facet has nothing to bounce
+    // The sun must be low relative to the surface too, so a facet has something to bounce
     // toward the eye.
     let NdotL = clamp(dot(N, L), 0.0, 1.0);
     let lightGate = smoothstep(0.02, 0.35, NdotL) * (1.0 - smoothstep(0.55, 0.95, NdotL) * 0.55);
@@ -214,7 +214,7 @@ fn pcssShadow(
         }
     }
 
-    // Nothing in front of the receiver: fully lit, and the filter is skipped.
+    // The receiver is clear: fully lit, and the filter is skipped.
     if (blockerCount < 0.5) { return 1.0; }
 
     // ---- penumbra estimate ------------------------------------------------ Similar

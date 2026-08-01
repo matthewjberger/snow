@@ -192,7 +192,7 @@ pub fn update(
 ///
 /// Grounded, the height is a spring onto the terrain, which carries the
 /// character over bumps with the camera steady. Airborne it is plain
-/// ballistics. One or the other runs, never both.
+/// ballistics. Exactly one of them runs each frame.
 fn vertical_step(character: &mut Character, step: f32, input: &SnowInput, rig: &mut CameraRig) {
     if !character.airborne && input.jump {
         character.airborne = true;

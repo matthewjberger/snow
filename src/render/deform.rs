@@ -22,7 +22,7 @@ pub struct Deform {
     pipeline: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     uniforms: wgpu::Buffer,
-    /// One bind group per source parity, so the flip costs nothing per frame.
+    /// One bind group per source parity, so the flip is a pointer swap.
     bind_groups: Option<[wgpu::BindGroup; 2]>,
     targets: Option<[wgpu::TextureView; 2]>,
     /// Which target holds the state the simulation reads this frame.
@@ -138,7 +138,7 @@ pub fn write(
     );
 }
 
-/// Advances the buffer one frame, into the target the source is not.
+/// Advances the buffer one frame, into whichever target the source left free.
 pub fn record(deform: &Deform, encoder: &mut wgpu::CommandEncoder) {
     let (Some(bind_groups), Some(targets)) = (&deform.bind_groups, &deform.targets) else {
         return;

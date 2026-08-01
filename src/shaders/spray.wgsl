@@ -42,7 +42,7 @@ fn vertexMain(input: VertexInput) -> Varyings {
     // A dead grain has a zero radius, which collapses all four corners onto one point.
     let radius = place.w;
 
-    // Spin, hashed off the seed, so a burst is not four hundred identical discs.
+    // Spin, hashed off the seed, so every disc in a burst sits at its own angle.
     let angle = state.y * 6.28318530718 + state.x * (state.y - 0.5) * 3.0;
     let spun = vec2f(
         corner.x * cos(angle) - corner.y * sin(angle),

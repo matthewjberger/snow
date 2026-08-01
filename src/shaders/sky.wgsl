@@ -5,7 +5,7 @@
 #import snow::ridge::{RidgeHit, ridgeMarch, ridgeShadow}
 
 // The skybox, drawn as a cube pinned to the camera and pushed to the far plane so it
-// fills exactly whatever the terrain does not.
+// fills exactly whatever the terrain leaves.
 
 struct SkyUniforms {
     viewProjection: mat4x4f,

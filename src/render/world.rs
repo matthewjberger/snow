@@ -223,7 +223,7 @@ impl PassNode<RenderInputs> for SnowWorldPass {
             wake_pass::draw_beauty(&self.wake, &mut pass);
             crystal_pass::draw_beauty(&self.crystal, &mut pass);
             // Water before the mist: spray hanging in front of a body of
-            // water is far commoner than the reverse, and neither writes depth.
+            // water is far commoner than the reverse, and both read depth alone.
             water_pass::draw(&self.water, &mut pass);
             spray_pass::draw(&self.spray, &mut pass);
         }

@@ -59,7 +59,7 @@ fn vertexMain(input: VertexInput) -> Varyings {
     let alongTangent = (wakePoint(wakeTex, count, u + du * su, q, side, time) - point) * su;
     let acrossTangent = (wakePoint(wakeTex, count, u, q + dq * sq, side, time) - point) * sq;
 
-    // The multiply by side is not cosmetic, and leaving it out is a bug that hides.
+    // The multiply by side is load bearing, and leaving it out is a bug that hides.
     var normal = cross(acrossTangent, alongTangent) * side;
     let length = length(normal);
     // Degenerate where the amplitude envelope has collapsed the strip onto its own
@@ -91,7 +91,7 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
     let sun = uniforms.sunDir.xyz;
 
     // The wake is an open sheet with a curl in it, so both faces are visible and the
-    // winding says nothing useful.
+    // winding is arbitrary.
     let geometric = normalize(input.normal);
     let facing = select(-1.0, 1.0, dot(geometric, view) >= 0.0);
     var normal = geometric * facing;

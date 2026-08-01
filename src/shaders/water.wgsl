@@ -207,7 +207,7 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
 
     // Light that entered the body, bounced off entrained air and snow, and came
     // back out toward the eye, tinted by what the water did not absorb on the way.
-    // The reciprocal pi is not decoration: a scattering lobe is a distribution,
+    // The reciprocal pi is load bearing: a scattering lobe is a distribution,
     // and dropping it overstates the peak threefold.
     let inScatter = backScatter(normal, sun, view, 0.55, 2.6, 1.0);
     let scatterTint =
@@ -216,11 +216,11 @@ fn fragmentMain(input: Varyings) -> @location(0) vec4f {
         * uniforms.snow.z * mix(0.30, 1.0, shadow);
 
     // Sky filling the body from above, without which the shadowed side of an arc
-    // has nothing in it but the refraction and goes dead.
+    // is left with the refraction alone and goes dead.
     color += shIrradiance(normal, uniforms.harmonics) * uniforms.misc.y * INV_PI
         * scatterTint * (0.35 + 0.5 * input.milk);
 
-    // Slush is not a colour. It is an opaque diffuse population inside the body,
+    // Slush is an opaque diffuse population inside the body,
     // so it fills in behind the transparency rather than tinting it.
     if (input.milk > 0.002) {
         let slushAlbedo = vec3f(0.86, 0.90, 0.96);

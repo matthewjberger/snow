@@ -46,6 +46,11 @@ pub struct SnowResources {
     /// Seconds since the first frame, frozen when `Settings::freeze_time` is set.
     pub time: f32,
 
+    /// How far into the bending stance the figure is, zero to one.
+    pub cast_blend: f32,
+    /// Seconds of stance left to hold after the last spell went off.
+    pub cast_hold: f32,
+
     /// The engine camera.
     pub camera_entity: Option<Entity>,
 }

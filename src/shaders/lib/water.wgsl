@@ -71,7 +71,7 @@ fn waterSpineTangent(tex: texture_2d<f32>, base: i32, count: f32, u: f32) -> vec
 /// The lattice carries a fixed vertex count whatever the strand is doing, so
 /// keying the field to world distance puts a long strand past Nyquist and the
 /// field beats instead of adding detail. Sampled around a circle rather than
-/// along the angle, because a tube is closed and plain noise is not periodic, so
+/// along the angle, because a tube is closed and plain noise runs on forever, so
 /// feeding the angle in directly creases every tube along its length.
 fn waterRelief(u: f32, theta: f32, time: f32) -> f32 {
     let circle = vec2f(cos(theta), sin(theta));
@@ -119,7 +119,7 @@ fn waterPoint(
 
     if (profile < 0.5) {
         let theta = q * 6.28318530718 + frame.w;
-        // Scaled by the radius, so a thin trailing wisp is not covered in the
+        // Scaled by the radius, so a thin trailing wisp carries less of the
         // same lumps as a metre-wide column.
         let relief = waterRelief(clamp(u, 0.0, 1.0), theta, time);
         let swollen = radius * (1.0 + relief * 0.22);

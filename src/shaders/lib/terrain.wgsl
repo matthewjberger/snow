@@ -23,7 +23,7 @@ fn terrainMacro(p: vec2f, w: f32, amp: f32) -> f32 {
     let broad = fbmDamped(m1 * p, 5, 2.03, 0.5, 0.9);
     var h = broad.x * 15.5;
 
-    // A second, much larger and gentler swell so the field never reads as one repeating
+    // A second, much larger and gentler swell so the field reads as landscape instead of one repeating
     // dune wavelength.
     let m0 = windMat(w, 1.35, 1.0, 210.0);
     let swell = fbmDamped(m0 * p, 3, 2.11, 0.55, 0.3);

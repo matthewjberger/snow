@@ -32,7 +32,7 @@ fn reflectionAt(uv: vec2f, pixel: vec2f, z: f32, mask: f32) -> vec4f {
 
     let view = normalize(origin);
     let ray = reflect(view, normal);
-    // A ray heading back toward the eye has nothing on screen to find.
+    // A ray heading back toward the eye leaves the screen behind it.
     if (ray.z < 0.02) { return miss; }
 
     // Step length set so the ray crosses roughly one pixel per step near the surface,

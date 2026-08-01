@@ -61,7 +61,7 @@ fn fragmentMain(input: FullscreenVertex) -> @location(0) vec4f {
     if (uniforms.focus.z > 0.5) {
         let z = textureSampleLevel(depthTex, linearSamp, input.uv, 0.0).r;
         let radius = abs(circleOfConfusion(z, uniforms.focus.x)) * uniforms.focus.y;
-        // Under a pixel and a half there is nothing a gather can do that the display
+        // Under a pixel and a half a gather only repeats what the display
         // transform will not throw away, and this is the branch almost the whole frame
         // takes.
         if (radius >= 1.5) {

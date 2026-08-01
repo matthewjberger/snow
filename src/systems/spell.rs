@@ -11,14 +11,22 @@ pub mod water;
 pub use lights::SpellLights;
 pub use water::WaterBody;
 
-use crate::ecs::SnowResources;
+use crate::ecs::{RIBBON, Ribbon, SnowResources};
 use crate::input::SnowInput;
+use crate::math::exp_damp;
 use crate::settings::Settings;
+use crate::systems::character::Character;
 use crate::systems::deform::Deformation;
 use crate::systems::terrain::Heightfield;
 use crate::systems::{Perf, Spray, perf};
 use nightshade::prelude::nightshade_ecs::dynamic::Component;
 use nightshade::prelude::*;
+
+/// Seconds the bending stance holds after a spell goes off.
+///
+/// Long enough to cover the throw that follows the press, so the arms are still
+/// out when the water leaves them.
+const CAST_HOLD: f32 = 0.55;
 
 /// Everything a spell writes into while it runs.
 ///
@@ -105,12 +113,15 @@ pub fn cast_system(snow: &mut SnowResources, world: &mut World) {
 
     let SnowResources {
         rig,
+        character,
         heightfield,
         water,
         lights,
         deform,
         spray,
         time,
+        cast_blend,
+        cast_hold,
         ..
     } = snow;
 
@@ -129,6 +140,7 @@ pub fn cast_system(snow: &mut SnowResources, world: &mut World) {
         spray,
         trauma: 0.0,
     };
+    let aim = cast.aim;
 
     if !enabled {
         sweep::cancel_all(world, cast.water);
@@ -138,11 +150,15 @@ pub fn cast_system(snow: &mut SnowResources, world: &mut World) {
         crystallize::cancel_all(world);
         crystals::clear(world);
         water::end_frame(cast.water, delta_time);
+        *cast_hold = 0.0;
+        stance(world, character, cast_blend, cast_hold, aim, delta_time);
         mark(world, &mut clock);
         return;
     }
 
-    let aim = cast.aim;
+    if matches!(pressed, 1 | 3 | 4 | 5) {
+        *cast_hold = CAST_HOLD;
+    }
     match pressed {
         // Flat, because the crescent runs along the ground and a camera pointed
         // at the sky must not launch it into the air.
@@ -187,7 +203,32 @@ pub fn cast_system(snow: &mut SnowResources, world: &mut World) {
         crate::camera::add_trauma(rig, trauma);
     }
 
+    stance(world, character, cast_blend, cast_hold, aim, delta_time);
     mark(world, &mut clock);
+}
+
+/// Eases the figure into the bending stance and back out of it.
+///
+/// A blend so the arms travel to the pose and settle back, and it sits on top of
+/// the walk swing, so a character casting while walking still walks. The stance
+/// holds while the ribbon is up and for a beat after any other spell, which is
+/// long enough to cover the throw that follows the press.
+fn stance(
+    world: &World,
+    character: &mut Character,
+    blend: &mut f32,
+    hold: &mut f32,
+    aim: [f32; 3],
+    delta_time: f32,
+) {
+    *hold = (*hold - delta_time).max(0.0);
+    let holding = live::<Ribbon>(world, RIBBON).is_some();
+    let want = if holding || *hold > 0.0 { 1.0 } else { 0.0 };
+    let rate = if want > 0.5 { 7.0 } else { 3.2 };
+
+    *blend = exp_damp(*blend, want, rate, delta_time);
+    character.cast = *blend;
+    character.cast_aim = Vec3::new(aim[0], aim[1], aim[2]);
 }
 
 /// Files this frame's spell cost under the same clock the other systems use, so

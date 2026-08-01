@@ -3,7 +3,7 @@
 #import snow::noise::{hash21, hash22}
 
 // The shape of a grown ice formation: a six-sided tapered prism with a point on
-// it, and deliberately nothing more. The read comes from the cluster, from the
+// it, and deliberately that alone. The read comes from the cluster, from the
 // light through it, and from the fact that it grows.
 //
 // Three rows, one column per crystal:
@@ -23,7 +23,7 @@ const CRYSTAL_VERTS: i32 = 13;
 /// a regular hexagon, which reads as manufactured immediately.
 fn crystalLocal(v: i32, height: f32, radius: f32, seed: f32) -> vec3f {
     if (v >= CRYSTAL_VERTS - 1) {
-        // Apex, nudged off the axis so the point is not perfectly centred.
+        // Apex, nudged off the axis so the point sits slightly to one side.
         let jitter = hash22(vec2f(seed, 7.31)) - 0.5;
         return vec3f(jitter.x * radius * 0.5, height, jitter.y * radius * 0.5);
     }

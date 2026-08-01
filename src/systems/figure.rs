@@ -55,6 +55,16 @@ const SHIN_LEN: f32 = 0.37;
 const UPPER_LEN: f32 = 0.28;
 const FORE_LEN: f32 = 0.26;
 
+/// How close and how far the hand is allowed to sit from the shoulder, as a
+/// fraction of the arm's reach.
+///
+/// The solver answers for any target, but outside this band the answers are an
+/// arm folded flat against itself or one locked dead straight, and the elbow
+/// swings hard between them as the target crosses. Holding the hand inside the
+/// band keeps a real bend in the joint whatever the aim is doing.
+const ARM_NEAR: f32 = 0.55;
+const ARM_FAR: f32 = 0.92;
+
 /// Pelvis height above the feet in the bind pose.
 pub const HIP_HEIGHT: f32 = 0.95;
 
@@ -146,8 +156,22 @@ fn solve_two_bone(
     ];
     let mut length = norm(perpendicular);
     if length < 1e-5 {
-        perpendicular = [0.0, 0.0, 1.0];
-        length = 1.0;
+        // The hint has come to lie along the limb, so it has lost its say in
+        // which way the joint breaks. Fall back to a direction square to the
+        // limb, taken off whichever world axis the limb leans on least, which
+        // holds the joint square to the bone wherever the target has swung to.
+        let spare = if axis[1].abs() < 0.9 {
+            [0.0, 1.0, 0.0]
+        } else {
+            [0.0, 0.0, 1.0]
+        };
+        let along_spare = spare[0] * axis[0] + spare[1] * axis[1] + spare[2] * axis[2];
+        perpendicular = [
+            spare[0] - axis[0] * along_spare,
+            spare[1] - axis[1] * along_spare,
+            spare[2] - axis[2] * along_spare,
+        ];
+        length = norm(perpendicular).max(1e-6);
     }
 
     (
@@ -162,6 +186,30 @@ fn solve_two_bone(
             root[2] + axis[2] * distance,
         ],
     )
+}
+
+/// Pulls a target into the band the joint bends comfortably through.
+///
+/// Applied after every pose has blended, so the walk, the cast and the surf can
+/// each aim wherever reads best and the arm still lands somewhere it can hold.
+fn hold_in_reach(root: [f32; 3], target: [f32; 3], reach: f32) -> [f32; 3] {
+    let delta = [
+        target[0] - root[0],
+        target[1] - root[1],
+        target[2] - root[2],
+    ];
+    let distance = norm(delta);
+    if distance < 1e-4 {
+        return [root[0], root[1] + reach * ARM_NEAR, root[2]];
+    }
+
+    let held = distance.clamp(reach * ARM_NEAR, reach * ARM_FAR);
+    let scale = held / distance;
+    [
+        root[0] + delta[0] * scale,
+        root[1] + delta[1] * scale,
+        root[2] + delta[2] * scale,
+    ]
 }
 
 /// The skeleton, its bind pose, and the procedural locomotion that poses it.
@@ -490,14 +538,14 @@ fn update_feet(figure: &mut Figure, step: f32, character: &Character, heightfiel
         for foot in 0..2 {
             let lateral = if foot == 0 { -0.17 } else { 0.17 };
             let along = if foot == 0 { 0.11 } else { -0.11 };
-            let board_x = character.position.x + forward[0] * along + right[0] * lateral;
-            let board_z = character.position.z + forward[1] * along + right[1] * lateral;
-            let board_y = terrain::height_at(heightfield, board_x, board_z) - figure.sink;
+            let stance_x = character.position.x + forward[0] * along + right[0] * lateral;
+            let stance_z = character.position.z + forward[1] * along + right[1] * lateral;
+            let stance_y = terrain::height_at(heightfield, stance_x, stance_z) - figure.sink;
             let current = figure.foot_position[foot];
             figure.foot_position[foot] = [
-                current[0] + (board_x - current[0]) * surf,
-                current[1] + (board_y - current[1]) * surf,
-                current[2] + (board_z - current[2]) * surf,
+                current[0] + (stance_x - current[0]) * surf,
+                current[1] + (stance_y - current[1]) * surf,
+                current[2] + (stance_z - current[2]) * surf,
             ];
             figure.foot_weight[foot] = figure.foot_weight[foot].max(surf);
         }
@@ -603,10 +651,14 @@ fn pose_arms(
 
         if character.cast > 0.001 {
             let aim = character.cast_aim;
+            // The leading hand reaches along the aim and the trailing one is
+            // drawn back across the body. Both sit inside the reach band, so
+            // the leading arm keeps a slight bend at full extension and the
+            // trailing one holds a clear one.
             let leading = arm == 1;
-            let outward = if leading { 0.30 } else { -0.16 };
-            let along = if leading { 0.52 } else { 0.16 };
-            let lift = if leading { 0.26 } else { 0.02 };
+            let outward = if leading { 0.05 } else { -0.10 };
+            let along = if leading { 0.32 } else { 0.22 };
+            let lift = if leading { 0.11 } else { -0.05 };
             let cast_target = [
                 shoulder[0]
                     + basis.right[0] * (sign * 0.30 + outward * sign)
@@ -648,11 +700,20 @@ fn pose_arms(
             }
         }
 
+        // Where the elbow wants to sit: behind and outside the shoulder while the
+        // arms swing, swinging wider and lower as the casting stance comes in.
+        // That is where an elbow goes when the hands come up and forward, and it
+        // keeps the hint clear of the arm itself, which is what the hands
+        // reaching along the aim would otherwise close on.
+        let spread = 0.55 + 0.30 * character.cast;
+        let behind = 1.0 - 0.45 * character.cast;
+        let drop = 0.35 + 0.30 * character.cast;
         let pole = [
-            -basis.forward[0] + basis.right[0] * (sign * 0.55),
-            -basis.forward[1] + basis.right[1] * (sign * 0.55) - 0.35,
-            -basis.forward[2] + basis.right[2] * (sign * 0.55),
+            -basis.forward[0] * behind + basis.right[0] * (sign * spread),
+            -basis.forward[1] * behind + basis.right[1] * (sign * spread) - drop,
+            -basis.forward[2] * behind + basis.right[2] * (sign * spread),
         ];
+        let target = hold_in_reach(shoulder, target, UPPER_LEN + FORE_LEN);
         let (elbow, wrist) = solve_two_bone(shoulder, target, pole, UPPER_LEN, FORE_LEN);
 
         set_bone(

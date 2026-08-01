@@ -28,7 +28,7 @@ pub const WAKE_ROWS: usize = 18;
 /// The snow-surf wake: the wave, the plume, and the bow.
 pub struct Wake {
     position: [[f32; 3]; SPINE_MAX],
-    /// The board's right vector in the horizontal plane, per sample.
+    /// The rider's right vector in the horizontal plane, per sample.
     right: [[f32; 2]; SPINE_MAX],
     /// Odometer reading when the sample was laid, in metres.
     travel: [f32; SPINE_MAX],
@@ -107,8 +107,8 @@ pub fn update(
     wake.clock += delta_time;
     wake.odometer += (character.velocity.x.hypot(character.velocity.z)) * delta_time;
 
-    // The board cuts only while it is on the snow. The spine survives a quarter
-    // second, which is long enough for an ollie to land back into the wake it
+    // The rider cuts only while the feet are on the snow. The spine survives a
+    // quarter second, long enough for a jump to land back into the wake it
     // left.
     let active = !character.airborne && character.surf > 0.06 && character.speed > 1.6;
     if active {

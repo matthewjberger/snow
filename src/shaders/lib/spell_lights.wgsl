@@ -59,7 +59,7 @@ fn spellLighting(
     return acc;
 }
 
-// The same lights, for a surface that is not snow: fabric, fur, water, ice.
+// The same lights, for the other surfaces: fabric, fur, water, ice.
 fn spellLightingSurface(
     lights: SpellLights,
     world: vec3f,

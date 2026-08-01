@@ -112,7 +112,7 @@ fn ridgeMarch(camPos: vec3f, dir: vec3f, amp: f32) -> RidgeHit {
     const D_FAR: f32 = 45000.0;
     const STEPS: i32 = 18;
 
-    // A ray already above the tallest possible peak and still climbing can never hit.
+    // A ray already above the tallest possible peak and still climbing runs to the sky.
     let ceiling = ridgeCeiling(amp);
     if (camPos.y + slope * D_NEAR > ceiling && slope >= 0.0) { return out; }
 
@@ -156,7 +156,7 @@ fn ridgeMarch(camPos: vec3f, dir: vec3f, amp: f32) -> RidgeHit {
             return out;
         }
 
-        // Climbed clear of the tallest possible peak: nothing ahead can be hit.
+        // Climbed clear of the tallest possible peak, so the ray runs to the sky.
         if (rayY > ceiling && slope > 0.0) { return out; }
 
         prevGap = gap;

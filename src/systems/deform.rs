@@ -92,7 +92,7 @@ pub fn update(deform: &mut Deformation, delta_time: f32, focus: &Vec3) {
 }
 
 /// Clears the staged brushes, and zeroes the radius of every slot past the live
-/// ones so a stale radius can never be picked up by a later frame.
+/// ones so every later frame reads a radius this frame wrote.
 pub fn end_frame(deform: &mut Deformation) {
     for index in deform.count..MAX_BRUSHES {
         deform.staging[index * 4 + 2] = 0.0;

@@ -103,7 +103,7 @@ pub struct SnowGpu {
     pub linear_clamp: wgpu::Sampler,
     pub linear_repeat: wgpu::Sampler,
     pub linear_mip_repeat: wgpu::Sampler,
-    /// The sky LUT is equirectangular, so longitude wraps and latitude does not.
+    /// The sky LUT is equirectangular, so longitude wraps and latitude clamps.
     pub sky_sampler: wgpu::Sampler,
 }
 

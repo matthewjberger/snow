@@ -88,9 +88,8 @@ fn wakePoint(tex: texture_2d<f32>, count: f32, u: f32, q: f32, side: f32, time: 
 
     let section = wakeSection(q, scalars.y);
 
-    // The two walls start close together at the bow and spread behind it, which is what
-    // makes the pair read as a bow wave splitting around the board rather than as two
-    // unrelated banks.
+    // The two walls start close together at the bow and spread behind it, so the
+    // pair reads as one bow wave splitting around the rider.
     let base = 0.24 + 0.44 * smoothstep(0.3, 2.6, scalars.z);
 
     // Thrown snow curls, so the tangent turns along the section.
@@ -115,7 +114,7 @@ fn wakePoint(tex: texture_2d<f32>, count: f32, u: f32, q: f32, side: f32, time: 
     let trail = -q * q * 0.34 * scalars.x;
 
     // Sunk, because the base has to meet a trench floor and a berm crest that the
-    // spine's recorded ground height knows nothing about.
+    // spine's recorded ground height was taken before.
     return spine
         + right * (side * lateral)
         + vec3f(0.0, (section.y + sectionNormal.y * lump) * scalars.x - 0.10, 0.0)

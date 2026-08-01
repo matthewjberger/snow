@@ -74,7 +74,7 @@ fn noised(p: vec2f) -> vec3f {
     return vec3f(value, deriv);
 }
 
-// Value-only gradient noise, for places that never need the slope.
+// Value-only gradient noise, for places that want the height alone.
 fn noise2(p: vec2f) -> f32 {
     return noised(p).x;
 }
